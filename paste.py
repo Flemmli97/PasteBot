@@ -2,10 +2,9 @@ import discord
 import requests
 
 # ====== Configs
+
 channel_category = ""
 paste_site = "https://api.mclo.gs/1/log"
-# Set the bots token here
-token = ""
 allowed_files = (".txt", ".json", ".toml", ".log")
 
 # ======
@@ -42,4 +41,5 @@ async def on_message(message):
                 view.add_item(discord.ui.Button(url=url, label=f'View {file}'))
             await message.channel.send(msg, view=view)
 
-client.run(token)
+f = open(".secret", "r")
+client.run(f.read())
