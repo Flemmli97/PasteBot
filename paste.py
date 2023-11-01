@@ -2,7 +2,7 @@ import discord
 import requests
 
 # ====== Configs
-channel_category = "Text Channels"#"help-channels"
+channel_category = ""
 paste_site = "https://api.mclo.gs/1/log"
 # Set the bots token here
 token = ""
