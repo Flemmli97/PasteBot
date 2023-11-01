@@ -5,5 +5,5 @@ Simple Discord bot to automatically creating pastes from uploaded files
 
 First setup your bots token by creating a new `.secret` file and pasting in your token there. 
 
-Then Simply run `pip install requirements.txt`.  
+Then Simply run `pip install -r requirements.txt`.  
 After that run `python ./paste.py`
