@@ -20,6 +20,7 @@ async def on_message(message):
     if channel_category != "" and str(message.channel.category) != channel_category:
         return
     if len(message.attachments) > 0:
+        print(f'{message.created_at} - Attempting processing message with attachments: {message.attachments}')
         urls = []
         for attachment in message.attachments:
             if not attachment.filename.endswith(allowed_files):
@@ -32,6 +33,8 @@ async def on_message(message):
                 result = send.json()
                 if result["success"]:
                     urls.append((attachment.filename, result["url"]))
+            else:
+                print("Error sending to paste: ", send.raise_for_status())
 
         if len(urls) > 0:
             attachment_files = ", ".join([f'`{file}`' for (file,_) in urls])
