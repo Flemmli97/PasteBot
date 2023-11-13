@@ -1,10 +1,12 @@
 import discord
 import requests
+from datetime import datetime, timedelta, timezone
 
 # ====== Configs
 
 channel_category = ""
-paste_site = "https://api.mclo.gs/1/log"
+paste_site_api = "https://api.paste.gg/v1/pastes"
+paste_site = "https://paste.gg/"
 allowed_files = (".txt", ".json", ".toml", ".log")
 
 # ======
@@ -27,12 +29,16 @@ async def on_message(message):
                 continue
             output = await attachment.to_file()
             attachment_content = output.fp.read().decode('UTF-8')
+            exp = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+            file = [{"name": attachment.filename, "content": {"format": "text", "value": attachment_content}}]
+            data = {"visibility": "public", "expires": exp, "files": file}
             # Send content to paste site
-            send = requests.post(paste_site, data= {"content": attachment_content})
+            send = requests.post(paste_site_api, json=data)
             if send.ok:
                 result = send.json()
-                if result["success"]:
-                    urls.append((attachment.filename, result["url"]))
+                if result["status"] == "success":
+                    id = result["result"]["id"]
+                    urls.append((attachment.filename, f'{paste_site}/{id}'))
             else:
                 print("Error sending to paste: ", send.raise_for_status())
 
