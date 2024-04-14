@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 
 # ====== Configs
 
+server_id = ""
 channel_category = ""
 paste_site_api = "https://api.paste.gg/v1/pastes"
 paste_site = "https://paste.gg/"
@@ -18,6 +19,8 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_message(message):
     if message.author == client.user or message.author.bot:
+        return
+    if server_id == "" or str(message.guild.id) != server_id:
         return
     if channel_category != "" and str(message.channel.category) != channel_category:
         return
