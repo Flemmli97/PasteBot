@@ -1,0 +1,4 @@
+services:
+  paste:
+    build: .
+    restart: always
