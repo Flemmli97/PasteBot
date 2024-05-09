@@ -1,11 +1,19 @@
 import discord
 import requests
 from datetime import datetime, timedelta, timezone
+import os
 
 # ====== Configs
 
-server_id = ""
-channel_category = ""
+try:
+  token = os.environ["BOT_TOKEN"]
+except KeyError as e:
+  raise Exception("Missing env var BOT_TOKEN: You need to specify a bot token")
+try:
+  server_id = os.environ["SERVER_ID"]
+except KeyError as e:
+  raise Exception("Missing env var SERVER_ID: You need to specify a server id")
+channel_category = os.getenv("CHANNEL")
 paste_site_api = "https://api.paste.gg/v1/pastes"
 paste_site = "https://paste.gg/"
 allowed_files = (".txt", ".json", ".toml", ".log")
@@ -20,9 +28,9 @@ client = discord.Client(intents=intents)
 async def on_message(message):
     if message.author == client.user or message.author.bot:
         return
-    if server_id == "" or str(message.guild.id) != server_id:
+    if str(message.guild.id) != server_id:
         return
-    if channel_category != "" and str(message.channel.category) != channel_category:
+    if channel_category != None and str(message.channel.category) != channel_category:
         return
     if len(message.attachments) > 0:
         print(f'{message.created_at} - Attempting processing message with attachments: {message.attachments}')
@@ -53,5 +61,4 @@ async def on_message(message):
                 view.add_item(discord.ui.Button(url=url, label=f'View {file}'))
             await message.channel.send(msg, view=view)
 
-f = open(".secret", "r")
-client.run(f.read())
+client.run(token)
