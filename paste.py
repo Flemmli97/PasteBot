@@ -15,8 +15,8 @@ except KeyError as e:
   raise Exception("Missing env var SERVER_ID: You need to specify a server id")
 channel_category = os.getenv("CHANNEL")
 mclogs = "https://api.mclo.gs/1/log"
-paste_site_api = "http://127.0.0.1:8088/"
-paste_site = "http://127.0.0.1:8088"
+paste_site_api = "http://blazing-coop.net/paste/"
+paste_site = "http://blazing-coop.net/paste"
 allowed_files = (".txt", ".json", ".toml", ".log")
 
 # ======
