@@ -45,7 +45,7 @@ async def on_message(message):
         return
     if str(message.guild.id) != server_id:
         return
-    if channel_category != None and str(message.channel.category) != channel_category:
+    if channel_category != None and str(message.channel.category.id) != channel_category:
         return
     if len(message.attachments) > 0:
         print(f'{message.created_at} - Attempting processing message with attachments: {message.attachments}')
