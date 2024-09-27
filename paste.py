@@ -1,6 +1,6 @@
 import discord
 import requests
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 import os
 
 # ====== Configs
@@ -14,8 +14,9 @@ try:
 except KeyError as e:
   raise Exception("Missing env var SERVER_ID: You need to specify a server id")
 channel_category = os.getenv("CHANNEL")
-paste_site_api = "https://api.paste.gg/v1/pastes"
-paste_site = "https://paste.gg/"
+mclogs = "https://api.mclo.gs/1/log"
+paste_site_api = "http://127.0.0.1:8088/"
+paste_site = "http://127.0.0.1:8088"
 allowed_files = (".txt", ".json", ".toml", ".log")
 
 # ======
@@ -23,6 +24,20 @@ allowed_files = (".txt", ".json", ".toml", ".log")
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
+
+'''
+    Sends the content to a paste site. Adjust for paste site api
+'''
+def send_paste(filename, content):
+    data = {"text": content, "filename": filename, "expires": int(timedelta(days=30).total_seconds())}
+    # Send content to paste site
+    send = requests.post(paste_site_api, json=data)
+    if send.ok:
+        result = send.json()
+        id = result["path"].removeprefix("/")
+        return (filename, f'{paste_site}/{id}')
+    else:
+        print("Error sending to paste: ", send.raise_for_status())
 
 @client.event
 async def on_message(message):
@@ -40,18 +55,21 @@ async def on_message(message):
                 continue
             output = await attachment.to_file()
             attachment_content = output.fp.read().decode('UTF-8')
-            exp = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-            file = [{"name": attachment.filename, "content": {"format": "text", "value": attachment_content}}]
-            data = {"visibility": "public", "expires": exp, "files": file}
-            # Send content to paste site
-            send = requests.post(paste_site_api, json=data)
-            if send.ok:
-                result = send.json()
-                if result["status"] == "success":
-                    id = result["result"]["id"]
-                    urls.append((attachment.filename, f'{paste_site}/{id}'))
+
+            # Send logfiles to mclogs since they have better synatx highlighting
+            if attachment.filename.endswith(".log"):
+                data = {"content": attachment_content}
+                send = requests.post(mclogs, data=data)
+                if send.ok:
+                    result = send.json()
+                    if result["success"] == "True":
+                        urls.append((attachment.filename, f'{result["url"]}'))
+                else:
+                    print("Error sending to paste: ", send.raise_for_status())
             else:
-                print("Error sending to paste: ", send.raise_for_status())
+                result = send_paste(attachment.filename, attachment_content)
+                if result is not None:
+                    urls.append(result)
 
         if len(urls) > 0:
             attachment_files = ", ".join([f'`{file}`' for (file,_) in urls])
